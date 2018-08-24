@@ -17,3 +17,6 @@ libraryDependencies ++= Seq(
 scalafmtOnCompile in ThisBuild := true
 scalafmtTestOnCompile in ThisBuild := true
 scalafmtFailTest in ThisBuild := true
+
+// Spark test class does not seem to handle well parallelization...
+parallelExecution in Test := false
