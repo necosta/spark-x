@@ -16,6 +16,7 @@ class DataObjectSpec extends FlatSpec with Matchers with SharedSparkContext {
     ds.count() should be(9)
     ds.columns.length should be(11)
 
+    // ToDo: Replace deprecated code
     ds.map(c => (c.FL_DATE.getYear, c.FL_DATE.getMonth)).head() should be(
       (118, 0))
   }

@@ -11,11 +11,13 @@ class DataflowSpec
 
   val folder = new java.io.File("output.parquet")
 
-  override def afterAll() = {
+  override def afterAll(): Unit = {
+    // ToDo: This is hacky. Improve this logic
     folder.listFiles().foreach(f => f.delete())
     folder.delete()
     super.afterAll()
   }
+
   "Dataflow" should "correctly run pipeline" in {
     val sourceFilePath = this.getClass.getResource("/sourceData.csv").getPath
     val airlineFilePath = this.getClass.getResource("/airlineData.csv").getPath

@@ -15,7 +15,9 @@ object SparkX {
     val airlineFilePath = s"$sourceFolder/airlineData.csv"
     val targetFilePath = s"$targetFolder/output.parquet"
 
-    Dataflow.withConfig(sourceFilePath, airlineFilePath, targetFilePath)
+    Dataflow
+      .withConfig(sourceFilePath, airlineFilePath, targetFilePath)
+      .start()
 
     spark.stop()
   }

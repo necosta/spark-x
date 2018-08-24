@@ -3,7 +3,7 @@ lazy val root = (project in file("."))
     name := "sparkx",
     organization := "pt.necosta",
     scalaVersion := "2.11.12",
-    version := "0.0.1-SNAPSHOT"
+    version := "0.0.2-SNAPSHOT"
   )
 
 val sparkVersion = "2.3.1"
