@@ -7,7 +7,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class DataflowSpec extends FlatSpec with Matchers with SharedSparkContext {
 
   "Dataflow" should "correctly add uid column" in {
-    implicit val spark : SparkSession = SparkSession.builder().getOrCreate()
+    implicit val spark: SparkSession = SparkSession.builder().getOrCreate()
     import spark.implicits._
 
     val df = (1 to 100).toDF("col1")

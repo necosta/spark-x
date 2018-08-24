@@ -7,8 +7,8 @@ object Dataflow extends WithSpark {
 
   val idColumnName = "id"
 
-  def addIdColumn(): DataFrame => DataFrame = {
-    df => {
+  def addIdColumn(): DataFrame => DataFrame = { df =>
+    {
       require(!df.columns.contains(idColumnName))
       df.withColumn(idColumnName, monotonically_increasing_id)
     }

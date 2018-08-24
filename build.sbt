@@ -9,6 +9,11 @@ lazy val root = (project in file("."))
 val sparkVersion = "2.3.1"
 
 libraryDependencies ++= Seq(
-    "org.apache.spark" %% "spark-sql" % sparkVersion,
-    "com.holdenkarau" %% "spark-testing-base" % (sparkVersion + "_0.10.0") % "test",
-    "org.scalatest" %% "scalatest" % "3.0.5" % "test")
+  "org.apache.spark" %% "spark-sql" % sparkVersion,
+  "com.holdenkarau" %% "spark-testing-base" % (sparkVersion + "_0.10.0") % "test",
+  "org.scalatest" %% "scalatest" % "3.0.5" % "test"
+)
+
+scalafmtOnCompile in ThisBuild := true
+scalafmtTestOnCompile in ThisBuild := true
+scalafmtFailTest in ThisBuild := true
