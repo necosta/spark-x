@@ -15,7 +15,24 @@ https://transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time
 ### Pre-requisites
 * Install [SBT](https://www.scala-sbt.org/download.html)
 
-### How to use
+### How to build Spark job
 * Build: `sbt compile`
 * Test: `sbt test`
-* Run: `sbt run`
+* Package: `sbt package`
+
+### How to run Spark job
+* Build image
+```
+docker build \
+  --build-arg CLASS_PATH=org.apache.spark.examples.SparkPi \
+  --build-arg JAR_PATH=/opt/spark/dist/examples/jars/spark-examples_2.11-2.2.0.jar \
+  -t sparkx .
+```
+* Run image
+```
+docker run sparkx
+```
+run with overrides:
+```
+docker run -e CLASS_PATH=CLASSPATH -e JAR_PATH=JARPATH sparkx
+```
