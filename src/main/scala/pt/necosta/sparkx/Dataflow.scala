@@ -14,19 +14,18 @@ object Dataflow {
     }
   }
 
-  def withConfig(sourceFilePath: String): Dataflow = {
-    new Dataflow(sourceFilePath)
+  def withConfig(sourceFilePath: String, airlineFilePath: String): Dataflow = {
+    new Dataflow(sourceFilePath,airlineFilePath)
   }
 }
 
-class Dataflow(sourceFilePath: String) extends WithSpark {
+class Dataflow(sourceFilePath: String, airlineFilePath: String) extends WithSpark {
   def start() = {
 
     // 1 - Import file into dataset
-    val ds = DataObject.csvToDataset(sourceFilePath)
-
-    // ToDo: 2 - Import lookup tables
-    // ToDo: 3 - Build final table
-
+    val sourceDataset = DataObject.getSource(sourceFilePath)
+    // 2 - Build final table
+    val outDs = sourceDataset.transform(DataObject.getOutput(airlineFilePath))
+    // ToDo: 3 - Save dataset for future Spark jobs?
   }
 }
