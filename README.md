@@ -11,3 +11,11 @@ https://transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time
 1. Secondary sorts like which airlines arrive the worst on which airport and by what delay
 1. Custom partitions using airline Id (in combination with - d)
 1. Any other interesting insights
+
+### Pre-requisites
+* Install [SBT](https://www.scala-sbt.org/download.html)
+
+### How to use
+* Build: `sbt compile`
+* Test: `sbt test`
+* Run: `sbt run`
