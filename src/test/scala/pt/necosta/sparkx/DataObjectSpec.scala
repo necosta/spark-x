@@ -11,7 +11,7 @@ class DataObjectSpec extends FlatSpec with Matchers with SharedSparkContext {
     import spark.implicits._
 
     val filePath = this.getClass.getResource("/sourceData.csv").getPath
-    val ds = DataObject.getSource(filePath)
+    val ds = DataObject.init().getSource(filePath)
 
     ds.count() should be(9)
     ds.columns.length should be(11)
@@ -22,7 +22,7 @@ class DataObjectSpec extends FlatSpec with Matchers with SharedSparkContext {
 
   "DataObject" should "correctly import lookup csv file into dataset" in {
     val filePath = this.getClass.getResource("/airlineData.csv").getPath
-    val ds = DataObject.getLookup(filePath)
+    val ds = DataObject.init().getLookup(filePath)
 
     ds.count() should be(9)
     ds.columns.length should be(2)
@@ -32,8 +32,9 @@ class DataObjectSpec extends FlatSpec with Matchers with SharedSparkContext {
     val sourceFilePath = this.getClass.getResource("/sourceData.csv").getPath
     val airlineFilePath = this.getClass.getResource("/airlineData.csv").getPath
     val out = DataObject
+      .init()
       .getSource(sourceFilePath)
-      .transform(DataObject.getOutput(airlineFilePath))
+      .transform(DataObject.init().getOutput(airlineFilePath))
 
     out.count() should be(9)
     out.columns.length should be(3)

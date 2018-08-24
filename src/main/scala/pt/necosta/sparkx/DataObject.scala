@@ -20,7 +20,14 @@ case class OutputRecord(FL_DATE: Timestamp,
                         AIRLINE_ID: Int,
                         AirlineDescription: String)
 
-object DataObject extends WithSpark {
+object DataObject {
+
+  def init(): DataObject = {
+    new DataObject()
+  }
+}
+
+class DataObject extends WithSpark {
   import spark.implicits._
 
   def getSource(sourceFilePath: String): Dataset[InputRecord] = {

@@ -1,31 +1,29 @@
 package pt.necosta.sparkx
 
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.functions._
-
 object Dataflow {
 
-  val idColumnName = "id"
-
-  def addIdColumn(): DataFrame => DataFrame = { df =>
-    {
-      require(!df.columns.contains(idColumnName))
-      df.withColumn(idColumnName, monotonically_increasing_id)
-    }
-  }
-
-  def withConfig(sourceFilePath: String, airlineFilePath: String): Dataflow = {
-    new Dataflow(sourceFilePath,airlineFilePath)
+  def withConfig(sourceFilePath: String,
+                 airlineFilePath: String,
+                 outputFolder: String): Dataflow = {
+    new Dataflow(sourceFilePath, airlineFilePath, outputFolder)
   }
 }
 
-class Dataflow(sourceFilePath: String, airlineFilePath: String) extends WithSpark {
-  def start() = {
+class Dataflow(sourceFilePath: String,
+               airlineFilePath: String,
+               outputFolder: String)
+    extends WithSpark {
 
+  private val saveFormat = "parquet"
+  private val dataObject = DataObject.init()
+
+  def start(): Unit = {
     // 1 - Import file into dataset
-    val sourceDataset = DataObject.getSource(sourceFilePath)
+    val sourceDs = dataObject.getSource(sourceFilePath)
     // 2 - Build final table
-    val outDs = sourceDataset.transform(DataObject.getOutput(airlineFilePath))
-    // ToDo: 3 - Save dataset for future Spark jobs?
+    val transformedDs = sourceDs
+      .transform(dataObject.getOutput(airlineFilePath))
+    // 3 - Save dataset for future Spark jobs
+    transformedDs.write.format(saveFormat).save(outputFolder)
   }
 }
