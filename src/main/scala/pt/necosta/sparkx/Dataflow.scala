@@ -15,7 +15,7 @@ class Dataflow(sourceFilePath: String,
     extends WithSpark {
 
   private val saveFormat = "parquet"
-  private val dataObject = DataObject.init()
+  private val dataObject = DataPrep.init()
 
   def start(): Unit = {
     // 1 - Import file into dataset
