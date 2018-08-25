@@ -8,6 +8,10 @@ case class AirlineDelays(AirlineDesc: String,
 
 case class AirlineFlights(AirlineDesc: String, FlightsCount: BigInt)
 
+case class AirlineAirportDelays(AirlineDesc: String,
+                                DestAirportDesc: String,
+                                AvgDelayTime: Double)
+
 object DataAnalysis extends WithSpark {
 
   def getDelaysByAirline: Dataset[OutputRecord] => Dataset[AirlineDelays] = {
@@ -40,5 +44,21 @@ object DataAnalysis extends WithSpark {
         .as[AirlineFlights]
   }
 
+  def getDelaysByAirlineAndByAirport
+    : Dataset[OutputRecord] => Dataset[AirlineAirportDelays] = {
+    import spark.implicits._
+
+    ds =>
+      ds.withColumn("DelayTime", delayMinUdf(col("ArrivalDelay")))
+        .groupBy($"AirlineDesc", $"DestAirportDesc")
+        .agg(
+          avg("DelayTime").alias("AvgDelayTime")
+        )
+        .select("AirlineDesc", "DestAirportDesc", "AvgDelayTime")
+        .as[AirlineAirportDelays]
+  }
+
   private val isDelayedUdf = udf((delay: Int) => if (delay > 0) 1 else 0)
+
+  private val delayMinUdf = udf((delay: Int) => if (delay > 0) delay else 0)
 }

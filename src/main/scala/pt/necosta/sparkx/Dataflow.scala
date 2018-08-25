@@ -37,11 +37,11 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     // Find the Airports with the least delay
     val delaysByAirlineDs = ds.transform(DataAnalysis.getDelaysByAirline)
 
-    val delaysByAirlineRecord = delaysByAirlineDs
+    val delaysByAirlineRecords = delaysByAirlineDs
       .orderBy(asc("DeparturesWithDelayPerc"))
       .take(NUMBER_RECORDS)
     println(s"The top $NUMBER_RECORDS airports with the least delay are:")
-    delaysByAirlineRecord.foreach(r =>
+    delaysByAirlineRecords.foreach(r =>
       println(
         s"${r.AirlineDesc}: ${"%.2f".format(r.DeparturesWithDelayPerc.get * 100)}% delays"))
 
@@ -51,16 +51,25 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     val flightsByAirlineToCityDs =
       ds.transform(DataAnalysis.getFlightsByAirlineToCity(city))
 
-    val flightsByAirlineRecord = flightsByAirlineToCityDs
+    val flightsByAirlineRecords = flightsByAirlineToCityDs
       .orderBy(desc("FlightsCount"))
       .take(NUMBER_RECORDS)
     println(s"The top $NUMBER_RECORDS airlines that fly to $city are:")
-    flightsByAirlineRecord.foreach(r =>
+    flightsByAirlineRecords.foreach(r =>
       println(s"${r.AirlineDesc}: ${r.FlightsCount} flights"))
 
     // Which airlines arrive the worst on which airport and by what delay
+    val delaysByAirlineAndByAirportDs =
+      ds.transform(DataAnalysis.getDelaysByAirlineAndByAirport)
+    val delaysByAirlineAndByAirportRecords = delaysByAirlineAndByAirportDs
+      .orderBy(desc("AvgDelayTime"))
+      .take(NUMBER_RECORDS)
+    println(
+      s"The top $NUMBER_RECORDS airlines/airports combinations by delay time:")
+    delaysByAirlineAndByAirportRecords.foreach(r =>
+      println(
+        s"${r.AirlineDesc}-${r.DestAirportDesc}: ${"%.2f".format(r.AvgDelayTime)} min (avg)"))
 
-    // Any other interesting insights
+    // ToDo: Any other interesting insights
   }
-
 }

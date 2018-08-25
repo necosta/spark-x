@@ -29,6 +29,20 @@ class DataAnalysisSpec extends TestConfig {
     orderedRecords.head.AirlineDesc should be("Cochise Airlines Inc.: COC     ")
   }
 
+  "DataAnalysis" should "correctly aggregate airlines+airports by delay time" in {
+
+    val ds = importOutputDs()
+
+    val output = ds.transform(DataAnalysis.getDelaysByAirlineAndByAirport)
+
+    val orderedRecords = output.orderBy(desc("AvgDelayTime"))
+    //orderedRecords.show()
+    orderedRecords.head.AirlineDesc should be("Munz Northern Airlines Inc.: XY")
+    orderedRecords.head.DestAirportDesc should be(
+      "Kahului, HI: Kahului Airport                     ")
+    orderedRecords.head.AvgDelayTime should be(72.0)
+  }
+
   private def importOutputDs(): Dataset[OutputRecord] = {
     implicit val spark: SparkSession = SparkSession.builder().getOrCreate()
     import spark.implicits._
