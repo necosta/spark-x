@@ -1,28 +1,17 @@
 package pt.necosta.sparkx
 
-import com.holdenkarau.spark.testing.SharedSparkContext
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import java.io.File
 
-class DataflowSpec
-    extends FlatSpec
-    with Matchers
-    with BeforeAndAfterAll
-    with SharedSparkContext {
+class DataflowSpec extends TestConfig {
 
-  val folder = new java.io.File("output.parquet")
-
-  override def afterAll(): Unit = {
-    // ToDo: This is hacky. Improve this logic
-    folder.listFiles().foreach(f => f.delete())
-    folder.delete()
-    super.afterAll()
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    tryCopyResourcesToTestDir()
   }
 
   "Dataflow" should "correctly run pipeline" in {
-    val sourceFilePath = this.getClass.getResource("/sourceData.csv").getPath
-    val airlineFilePath = this.getClass.getResource("/airlineData.csv").getPath
-    val targetFolder = folder.getName
-    Dataflow.withConfig(sourceFilePath, airlineFilePath, targetFolder).start()
-    folder.exists() should be(true)
+    val dataflow = Dataflow.withConfig(testFolderPath)
+    dataflow.start()
+    new File(dataflow.outputFolder).exists() should be(true)
   }
 }

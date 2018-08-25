@@ -9,14 +9,9 @@ object SparkX {
       .getOrCreate()
 
     val sourceFolder = sys.env.getOrElse("SPARKX_SOURCE_FOLDER", "/sparkx")
-    val targetFolder = sys.env.getOrElse("SPARKX_TARGET_FOLDER", "/sparkx")
-
-    val sourceFilePath = s"$sourceFolder/sourceData.csv"
-    val airlineFilePath = s"$sourceFolder/airlineData.csv"
-    val targetFilePath = s"$targetFolder/output.parquet"
 
     Dataflow
-      .withConfig(sourceFilePath, airlineFilePath, targetFilePath)
+      .withConfig(sourceFolder)
       .start()
 
     spark.stop()

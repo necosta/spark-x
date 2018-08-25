@@ -1,19 +1,19 @@
 package pt.necosta.sparkx
 
 import org.apache.spark.sql.{DataFrame, Dataset}
-import java.sql.Timestamp
 
 object DataPrep {
 
-  def init(): DataPrep = {
-    new DataPrep()
+  def init(sourceFolder: String): DataPrep = {
+    new DataPrep(sourceFolder)
   }
 }
 
-class DataPrep extends WithSpark {
+class DataPrep(sourceFolder: String) extends WithSpark {
   import spark.implicits._
 
-  def getSource(sourceFilePath: String): Dataset[InputRecord] = {
+  def getSource(): Dataset[InputRecord] = {
+    val sourceFilePath = s"$sourceFolder/sourceData.csv"
     csvToDataFrame(sourceFilePath)
       .as[InputRecord]
   }
@@ -23,8 +23,8 @@ class DataPrep extends WithSpark {
       .as[LookupRecord]
   }
 
-  def getOutput(airlineFilePath: String)
-    : Dataset[InputRecord] => Dataset[OutputRecord] = {
+  def buildFinalDs(): Dataset[InputRecord] => Dataset[OutputRecord] = {
+    val airlineFilePath = s"$sourceFolder/airlineData.csv"
     val airlineDataset = getLookup(airlineFilePath)
     ds =>
       {
