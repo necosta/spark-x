@@ -1,5 +1,7 @@
 package pt.necosta.sparkx
 
+import org.apache.spark.sql.functions._
+
 object Dataflow {
 
   def withConfig(sourceFolder: String): Dataflow = {
@@ -26,7 +28,19 @@ class Dataflow(sourceFolder: String) extends WithSpark {
   }
 
   def runAnalysis(): Unit = {
+    import spark.implicits._
+
+    val ds = spark.read.parquet(outputFolder).as[OutputRecord]
+
     // Find the Airports with the least delay
+    val delaysByAirlineDs = ds.transform(DataAnalysis.getDelaysByAirline)
+    val NUMBER_RECORDS = 3
+    val delaysByAirlineRecord = delaysByAirlineDs
+      .orderBy(asc("DeparturesWithDelayPerc"))
+      .take(NUMBER_RECORDS)
+    println(s"The top $NUMBER_RECORDS airports with the least delay are:")
+    delaysByAirlineRecord.foreach(r =>
+      println(s"${r.AirlineDesc}: ${r.DeparturesWithDelayPerc} delays"))
 
     // Which Airline has most flights to New York
 
@@ -34,4 +48,5 @@ class Dataflow(sourceFolder: String) extends WithSpark {
 
     // Any other interesting insights
   }
+
 }
