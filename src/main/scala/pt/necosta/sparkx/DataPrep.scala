@@ -16,7 +16,7 @@ object DataPrep {
 class DataPrep(sourceFolder: String) extends WithSpark {
   import spark.implicits._
 
-  val sourceURL = "https://www.transtats.bts.gov/Download_Lookup.asp"
+  private val SOURCE_URL = "https://www.transtats.bts.gov/Download_Lookup.asp"
 
   val baseTableName = "BASE"
   val airlineTableName = "L_AIRLINE_ID"
@@ -88,7 +88,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
 
   private def importTable(lookupMap: (String, String)): Unit = {
     val content = scala.io.Source
-      .fromURL(s"$sourceURL?Lookup=${lookupMap._1}")
+      .fromURL(s"$SOURCE_URL?Lookup=${lookupMap._1}")
       .mkString
     new PrintWriter(s"$sourceFolder/${lookupMap._2}") {
       write(content); close()

@@ -39,16 +39,9 @@ Select fields:
 ### How to run Spark job
 * Build image
 ```
-docker build \
-  --build-arg CLASS_PATH=org.apache.spark.examples.SparkPi \
-  --build-arg JAR_PATH=/opt/spark/dist/examples/jars/spark-examples_2.11-2.2.0.jar \
-  -t sparkx .
+docker build --build-arg VERSION=x.y.z -t sparkx .
 ```
 * Run image
 ```
 docker run sparkx
-```
-run with overrides:
-```
-docker run -e CLASS_PATH=CLASSPATH -e JAR_PATH=JARPATH sparkx
 ```
