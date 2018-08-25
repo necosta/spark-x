@@ -15,8 +15,9 @@ class DataPrepSpec extends TestConfig {
 
     val ds = DataPrep.init(testFolderPath).getSourceDs
 
-    ds.count() should be(9)
-    ds.columns.length should be(11)
+    // Extracted as `head -11 139514096_T_ONTIME.csv`
+    ds.count() should be(10)
+    ds.columns.length should be(10)
 
     // ToDo: Replace deprecated code
     ds.map(c => (c.FL_DATE.getYear, c.FL_DATE.getMonth)).head() should be(
@@ -27,7 +28,8 @@ class DataPrepSpec extends TestConfig {
     val filePath = this.getClass.getResource("/airlineData.csv").getPath
     val ds = DataPrep.init(testFolderPath).getLookup(filePath)
 
-    ds.count() should be(9)
+    ds.count() should be(10)
+    ds.select("code").distinct().count() should be(10)
     ds.columns.length should be(2)
   }
 
@@ -37,7 +39,8 @@ class DataPrepSpec extends TestConfig {
       .getSourceDs
       .transform(DataPrep.init(testFolderPath).buildFinalDs())
 
-    out.count() should be(9)
-    out.columns.length should be(3)
+    out.count() should be(10)
+    out.columns.length should be(9)
+    //out.show()
   }
 }

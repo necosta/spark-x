@@ -9,9 +9,9 @@ class DataflowSpec extends TestConfig {
     tryCopyResourcesToTestDir()
   }
 
-  "Dataflow" should "correctly run pipeline" in {
+  "Dataflow" should "correctly run import pipeline" in {
     val dataflow = Dataflow.withConfig(testFolderPath)
-    dataflow.start()
+    dataflow.runImport()
 
     new File(dataflow.outputFolder).exists() should be(true)
 

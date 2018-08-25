@@ -10,9 +10,13 @@ object SparkX {
 
     val sourceFolder = sys.env.getOrElse("SPARKX_SOURCE_FOLDER", "/sparkx")
 
-    Dataflow
-      .withConfig(sourceFolder)
-      .start()
+    val dataflow = Dataflow.withConfig(sourceFolder)
+
+    println("Starting data import")
+    dataflow.runImport()
+
+    println("Starting data analysis")
+    dataflow.runAnalysis()
 
     spark.stop()
   }

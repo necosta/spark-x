@@ -15,6 +15,22 @@ https://transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time
 ### Pre-requisites
 * Install [SBT](https://www.scala-sbt.org/download.html)
 
+### Source data
+Available here: https://transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time
+
+Select fields:
+* Time Period > Flight Date
+* Airline > AirlineID (L_AIRLINE_ID lookup)
+* Airline > FlightNum
+* Origin > OriginAirportID (L_AIRPORT_ID lookup)
+* Destination > DestAirportID (L_AIRPORT_ID lookup)
+* Destination > DestCityName
+* Departure Perf > DepDelay
+* Arrival Perf > ArrDelay
+* Cancellations and Diversions > Cancelled
+
+**ToDo:** Automate import of base table from webpage
+
 ### How to build Spark job
 * Build: `sbt compile`
 * Test: `sbt test`

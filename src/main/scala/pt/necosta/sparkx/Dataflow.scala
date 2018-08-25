@@ -13,7 +13,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
   val dataPrep = DataPrep.init(sourceFolder)
   val outputFolder = s"$sourceFolder/output.parquet"
 
-  def start(): Unit = {
+  def runImport(): Unit = {
     // 1 - Import all lookup tables into source folder as csv files
     dataPrep.importLookupTables()
     // 2 - Transform base csv file into dataset
@@ -23,5 +23,15 @@ class Dataflow(sourceFolder: String) extends WithSpark {
       sourceDs.transform(DataPrep.init(sourceFolder).buildFinalDs())
     // 4 - Persist final dataset as parquet for future Spark jobs
     transformedDs.write.format(saveFormat).save(outputFolder)
+  }
+
+  def runAnalysis(): Unit = {
+    // Find the Airports with the least delay
+
+    // Which Airline has most flights to New York
+
+    // Which airlines arrive the worst on which airport and by what delay
+
+    // Any other interesting insights
   }
 }

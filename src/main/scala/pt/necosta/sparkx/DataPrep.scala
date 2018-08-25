@@ -3,6 +3,8 @@ package pt.necosta.sparkx
 import java.io.PrintWriter
 
 import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.{BooleanType, IntegerType}
 
 object DataPrep {
 
@@ -18,8 +20,10 @@ class DataPrep(sourceFolder: String) extends WithSpark {
 
   val baseTableName = "BASE"
   val airlineTableName = "L_AIRLINE_ID"
+  val airportTableName = "L_AIRPORT_ID"
   val tables = Map(baseTableName -> "sourceData.csv",
-                   airlineTableName -> "airlineData.csv")
+                   airlineTableName -> "airlineData.csv",
+                   airportTableName -> "airportData.csv")
 
   def getSourceDs: Dataset[InputRecord] = {
     val sourceFilePath = s"$sourceFolder/${tables(baseTableName)}"
@@ -33,14 +37,48 @@ class DataPrep(sourceFolder: String) extends WithSpark {
   }
 
   def buildFinalDs(): Dataset[InputRecord] => Dataset[OutputRecord] = {
+    val JOIN_BROADCAST_HINT = "broadcast"
+
     val airlineFilePath = s"$sourceFolder/${tables(airlineTableName)}"
+    val airportFilePath = s"$sourceFolder/${tables(airportTableName)}"
+
     val airlineDataset = getLookup(airlineFilePath)
+      .withColumnRenamed("Code", "AirlineCode")
+      .withColumnRenamed("Description", "AirlineDesc")
+    val airportDataset = getLookup(airportFilePath)
+      .withColumnRenamed("Code", "AirportCode")
+      .withColumnRenamed("Description", "AirportDesc")
+
+    // ToDo: Assume all lookups have a match vs apply left join
     ds =>
       {
-        ds.join(airlineDataset.hint("broadcast"))
-          .where($"AIRLINE_ID" === $"Code")
-          .withColumnRenamed("Description", "AirlineDescription")
-          .select($"FL_DATE", $"AIRLINE_ID", $"AirlineDescription")
+        ds.join(airlineDataset.hint(JOIN_BROADCAST_HINT))
+          .where($"AIRLINE_ID" === $"AirlineCode")
+          .join(
+            airportDataset
+              .hint(JOIN_BROADCAST_HINT)
+              .withColumnRenamed("AirportCode", "OriginAirportCode")
+              .withColumnRenamed("AirportDesc", "OriginAirportDesc"))
+          .where($"ORIGIN_AIRPORT_ID" === $"OriginAirportCode")
+          .join(
+            airportDataset
+              .hint(JOIN_BROADCAST_HINT)
+              .withColumnRenamed("AirportCode", "DestAirportCode")
+              .withColumnRenamed("AirportDesc", "DestAirportDesc"))
+          .where($"DEST_AIRPORT_ID" === $"DestAirportCode")
+          .withColumn("DepartureDelay", col("DEP_DELAY").cast(IntegerType))
+          .withColumn("ArrivalDelay", col("ARR_DELAY").cast(IntegerType))
+          .withColumn("IsCancelled",
+                      col("CANCELLED").cast(IntegerType).cast(BooleanType))
+          .select("FL_DATE",
+                  "AirlineDesc",
+                  "FL_NUM",
+                  "OriginAirportDesc",
+                  "DestAirportDesc",
+                  "DEST_CITY_NAME",
+                  "DepartureDelay",
+                  "ArrivalDelay",
+                  "IsCancelled")
           .as[OutputRecord]
       }
   }
