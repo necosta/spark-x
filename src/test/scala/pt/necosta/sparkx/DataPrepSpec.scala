@@ -13,7 +13,7 @@ class DataPrepSpec extends TestConfig {
     implicit val spark: SparkSession = SparkSession.builder().getOrCreate()
     import spark.implicits._
 
-    val ds = DataPrep.init(testFolderPath).getSource()
+    val ds = DataPrep.init(testFolderPath).getSourceDs
 
     ds.count() should be(9)
     ds.columns.length should be(11)
@@ -34,7 +34,7 @@ class DataPrepSpec extends TestConfig {
   "DataPrep" should "correctly join source and lookup datasets" in {
     val out = DataPrep
       .init(testFolderPath)
-      .getSource()
+      .getSourceDs
       .transform(DataPrep.init(testFolderPath).buildFinalDs())
 
     out.count() should be(9)
