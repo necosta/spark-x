@@ -19,6 +19,6 @@ case class OutputRecord(FL_DATE: Timestamp,
                         OriginAirportDesc: String,
                         DestAirportDesc: String,
                         DEST_CITY_NAME: String,
-                        DepartureDelay: Int,
-                        ArrivalDelay: Int,
-                        IsCancelled: Boolean)
+                        DepartureDelay: Option[Int],
+                        ArrivalDelay: Option[Int],
+                        IsCancelled: Option[Boolean])

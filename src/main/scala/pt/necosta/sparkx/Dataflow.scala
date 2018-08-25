@@ -30,11 +30,13 @@ class Dataflow(sourceFolder: String) extends WithSpark {
   def runAnalysis(): Unit = {
     import spark.implicits._
 
+    val NUMBER_RECORDS = 3
+
     val ds = spark.read.parquet(outputFolder).as[OutputRecord]
 
     // Find the Airports with the least delay
     val delaysByAirlineDs = ds.transform(DataAnalysis.getDelaysByAirline)
-    val NUMBER_RECORDS = 3
+
     val delaysByAirlineRecord = delaysByAirlineDs
       .orderBy(asc("DeparturesWithDelayPerc"))
       .take(NUMBER_RECORDS)
@@ -43,7 +45,18 @@ class Dataflow(sourceFolder: String) extends WithSpark {
       println(
         s"${r.AirlineDesc}: ${"%.2f".format(r.DeparturesWithDelayPerc.get * 100)}% delays"))
 
-    // Which Airline has most flights to New York
+    // Which Airlines have the most flights to New York
+    // ToDo: Review this logic of looking up by name
+    val city = "New York"
+    val flightsByAirlineToCityDs =
+      ds.transform(DataAnalysis.getFlightsByAirlineToCity(city))
+
+    val flightsByAirlineRecord = flightsByAirlineToCityDs
+      .orderBy(desc("FlightsCount"))
+      .take(NUMBER_RECORDS)
+    println(s"The top $NUMBER_RECORDS airlines that fly to $city are:")
+    flightsByAirlineRecord.foreach(r =>
+      println(s"${r.AirlineDesc}: ${r.FlightsCount} flights"))
 
     // Which airlines arrive the worst on which airport and by what delay
 
