@@ -2,7 +2,7 @@ package pt.necosta.sparkx
 
 import java.io.PrintWriter
 
-import org.apache.spark.sql.{DataFrame, Dataset}
+import org.apache.spark.sql.{DataFrame, Dataset, Row}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.types.{BooleanType, IntegerType}
 
@@ -37,6 +37,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
   }
 
   def buildFinalDs(): Dataset[InputRecord] => Dataset[OutputRecord] = {
+
     val JOIN_BROADCAST_HINT = "broadcast"
 
     val airlineFilePath = s"$sourceFolder/${tables(airlineTableName)}"
@@ -66,24 +67,29 @@ class DataPrep(sourceFolder: String) extends WithSpark {
               .withColumnRenamed("AirportCode", "DestAirportCode")
               .withColumnRenamed("AirportDesc", "DestAirportDesc"))
           .where($"DEST_AIRPORT_ID" === $"DestAirportCode")
-          .withColumn("DepartureDelay", col("DEP_DELAY").cast(IntegerType))
-          .withColumn("ArrivalDelay", col("ARR_DELAY").cast(IntegerType))
-          .withColumn("IsCancelled",
-                      col("CANCELLED").cast(IntegerType).cast(BooleanType))
-          .select("FL_DATE",
-                  "AirlineDesc",
-                  "FL_NUM",
-                  "OriginAirportDesc",
-                  "DestAirportDesc",
-                  "DEST_CITY_NAME",
-                  "DepartureDelay",
-                  "ArrivalDelay",
-                  "IsCancelled")
-          .as[OutputRecord]
+          .transform[OutputRecord](applyDatasetTransform())
       }
   }
+
   def importLookupTables(): Unit = {
     tables.filter(t => t._1 != baseTableName).foreach(importTable)
+  }
+
+  def applyDatasetTransform(): Dataset[Row] => Dataset[OutputRecord] = { ds =>
+    ds.withColumn("DepartureDelay", col("DEP_DELAY").cast(IntegerType))
+      .withColumn("ArrivalDelay", col("ARR_DELAY").cast(IntegerType))
+      .withColumn("IsCancelled",
+                  col("CANCELLED").cast(IntegerType).cast(BooleanType))
+      .select("FL_DATE",
+              "AirlineDesc",
+              "FL_NUM",
+              "OriginAirportDesc",
+              "DestAirportDesc",
+              "DEST_CITY_NAME",
+              "DepartureDelay",
+              "ArrivalDelay",
+              "IsCancelled")
+      .as[OutputRecord]
   }
 
   private def importTable(lookupMap: (String, String)): Unit = {

@@ -14,7 +14,7 @@ class DataAnalysisSpec extends TestConfig {
 
     val orderedRecords = output.orderBy(asc("DeparturesWithDelayPerc"))
     //orderedRecords.show()
-    orderedRecords.head.AirlineDesc should be("ExpressJet Airlines Inc.: EV   ")
+    orderedRecords.head.AirlineDesc should be("ExpressJet Airlines Inc.: EV")
   }
 
   "DataAnalysis" should "correctly aggregate airlines by flights to city" in {
@@ -26,7 +26,7 @@ class DataAnalysisSpec extends TestConfig {
 
     val orderedRecords = output.orderBy(desc("FlightsCount"))
     //orderedRecords.show()
-    orderedRecords.head.AirlineDesc should be("Cochise Airlines Inc.: COC     ")
+    orderedRecords.head.AirlineDesc should be("Cochise Airlines Inc.: COC")
   }
 
   "DataAnalysis" should "correctly aggregate airlines+airports by delay time" in {
@@ -39,8 +39,15 @@ class DataAnalysisSpec extends TestConfig {
     //orderedRecords.show()
     orderedRecords.head.AirlineDesc should be("Munz Northern Airlines Inc.: XY")
     orderedRecords.head.DestAirportDesc should be(
-      "Kahului, HI: Kahului Airport                     ")
-    orderedRecords.head.AvgDelayTime should be(72.0)
+      "Kahului, HI: Kahului Airport")
+    orderedRecords.head.AvgDelayTime should be(Some(72.0))
+  }
+
+  "DataAnalysis" should "ignore cancelled flights" in {
+    val ds = importOutputDs()
+
+    val output = ds.transform(DataAnalysis.ignoreCancelled())
+    output.count() should be(9)
   }
 
   private def importOutputDs(): Dataset[OutputRecord] = {
@@ -54,6 +61,7 @@ class DataAnalysisSpec extends TestConfig {
       .option("header", "true")
       .option("delimiter", "|") // Necessary hack given the way output is created
       .option("ignoreLeadingWhiteSpace", value = true) // Necessary hack given the way output is created
+      .option("ignoreTrailingWhiteSpace", value = true) // Necessary hack given the way output is created
       .csv(outputFilePath)
       .withColumn("DepartureDelay", col("DepartureDelay").cast(IntegerType))
       .withColumn("ArrivalDelay", col("ArrivalDelay").cast(IntegerType))

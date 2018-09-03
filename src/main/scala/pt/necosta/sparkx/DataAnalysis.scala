@@ -10,7 +10,7 @@ case class AirlineFlights(AirlineDesc: String, FlightsCount: BigInt)
 
 case class AirlineAirportDelays(AirlineDesc: String,
                                 DestAirportDesc: String,
-                                AvgDelayTime: Double)
+                                AvgDelayTime: Option[Double])
 
 object DataAnalysis extends WithSpark {
 
@@ -18,11 +18,10 @@ object DataAnalysis extends WithSpark {
     import spark.implicits._
 
     ds =>
-      ds.withColumn("IsDelayed", isDelayedUdf(col("DepartureDelay")))
+      ds.transform(ignoreCancelled())
+        .withColumn("IsDelayed", isDelayedUdf(col("DepartureDelay")))
         .groupBy($"AirlineDesc")
         .agg(
-          count("DepartureDelay").alias("DeparturesCount"),
-          sum("IsDelayed").alias("DeparturesWithDelay"),
           (sum("IsDelayed") / count("DepartureDelay")).alias(
             "DeparturesWithDelayPerc")
         )
@@ -35,7 +34,8 @@ object DataAnalysis extends WithSpark {
     import spark.implicits._
 
     ds =>
-      ds.filter(r => r.DestAirportDesc.contains(city))
+      ds.transform(ignoreCancelled())
+        .filter(r => r.DestAirportDesc.contains(city))
         .groupBy($"AirlineDesc")
         .agg(
           count("FL_NUM").alias("FlightsCount")
@@ -49,7 +49,8 @@ object DataAnalysis extends WithSpark {
     import spark.implicits._
 
     ds =>
-      ds.withColumn("DelayTime", delayMinUdf(col("ArrivalDelay")))
+      ds.transform(ignoreCancelled())
+        .withColumn("DelayTime", delayMinUdf(col("ArrivalDelay")))
         .groupBy($"AirlineDesc", $"DestAirportDesc")
         .agg(
           avg("DelayTime").alias("AvgDelayTime")
@@ -61,4 +62,10 @@ object DataAnalysis extends WithSpark {
   private val isDelayedUdf = udf((delay: Int) => if (delay > 0) 1 else 0)
 
   private val delayMinUdf = udf((delay: Int) => if (delay > 0) delay else 0)
+
+  def ignoreCancelled(): Dataset[OutputRecord] => Dataset[OutputRecord] = {
+    // Assume no data is a non-cancelled flight!
+    ds =>
+      ds.filter(r => !r.IsCancelled.getOrElse(false))
+  }
 }
