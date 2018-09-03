@@ -13,7 +13,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
 
   private val SAVE_FORMAT = "parquet"
   val dataPrep = DataPrep.init(sourceFolder)
-  val outputFolder = s"$sourceFolder/output.parquet"
+  val outputFile = s"$sourceFolder/output.parquet"
 
   def runImport(): Unit = {
     // 1 - Import all lookup tables into source folder as csv files
@@ -24,7 +24,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     val transformedDs =
       sourceDs.transform(DataPrep.init(sourceFolder).buildFinalDs())
     // 4 - Persist final dataset as parquet for future Spark jobs
-    transformedDs.write.format(SAVE_FORMAT).save(outputFolder)
+    transformedDs.write.format(SAVE_FORMAT).save(outputFile)
   }
 
   def runAnalysis(): Unit = {
@@ -32,7 +32,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
 
     val NUMBER_RECORDS = 3
 
-    val ds = spark.read.parquet(outputFolder).as[OutputRecord]
+    val ds = spark.read.parquet(outputFile).as[OutputRecord]
 
     // Find the Airports with the least delay
     val delaysByAirlineDs = ds.transform(DataAnalysis.getDelaysByAirline)
