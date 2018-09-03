@@ -37,11 +37,13 @@ Select fields:
 * Package: `sbt package`
 
 ### How to run Spark job
-* Build image
+* Build image:
 ```
 docker build --build-arg VERSION=x.y.z -t sparkx .
 ```
-* Run image
+**Note**: Get version from version.sbt file
+
+* Run image:
 ```
 docker run sparkx
 ```
