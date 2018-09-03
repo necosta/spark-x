@@ -19,10 +19,21 @@ jobs:
     environment:
       # Customize the JVM maximum heap limit
       JVM_OPTS: -Xmx3200m
-      TERM: dumb
+      SBT_VERSION: 1.2.1
 
     steps:
     - checkout
+    - setup_remote_docker
+
+    - run:
+        name: Install sbt
+        command: |
+          curl -L -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb
+          dpkg -i sbt-$SBT_VERSION.deb
+          rm sbt-$SBT_VERSION.deb
+          apt-get update
+          apt-get install -y sbt
+          apt-get clean && apt-get autoclean
 
     # Download and cache dependencies
     - restore_cache:
