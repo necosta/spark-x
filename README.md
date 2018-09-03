@@ -1,6 +1,9 @@
 # spark-x
 Simple Spark project built in Scala
 
+### CI dashboard
+https://circleci.com/gh/necosta/spark-x
+
 ### To-Do
 With source (data for January, which will be around 100+MB deflated):
 https://transtats.bts.gov/DL_SelectFields.asp?Table_ID=236&DB_Short_Name=On-Time

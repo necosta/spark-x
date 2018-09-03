@@ -12,7 +12,7 @@ object Dataflow {
 class Dataflow(sourceFolder: String) extends WithSpark {
 
   private val SAVE_FORMAT = "parquet"
-  val dataPrep = DataPrep.init(sourceFolder)
+  val dataPrep : DataPrep = DataPrep.init(sourceFolder)
   val outputFile = s"$sourceFolder/output.parquet"
 
   def runImport(): Unit = {
@@ -68,7 +68,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
       s"The top $NUMBER_RECORDS airlines/airports combinations by delay time:")
     delaysByAirlineAndByAirportRecords.foreach(r =>
       println(
-        s"${r.AirlineDesc}-${r.DestAirportDesc}: ${"%.2f".format(r.AvgDelayTime)} min (avg)"))
+        s"${r.AirlineDesc}-${r.DestAirportDesc}: ${"%.2f".format(r.AvgDelayTime.get)} min (avg)"))
 
     // ToDo: Any other interesting insights
   }
