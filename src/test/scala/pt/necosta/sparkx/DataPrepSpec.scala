@@ -26,7 +26,7 @@ class DataPrepSpec extends TestConfig {
 
   "DataPrep" should "correctly import lookup csv file into dataset" in {
     val filePath = this.getClass.getResource("/airlineData.csv").getPath
-    val ds = DataPrep.init(testFolderPath).getLookup(filePath)
+    val ds = DataPrep.init(testFolderPath).getLookupDs(filePath)
 
     ds.count() should be(10)
     ds.select("code").distinct().count() should be(10)

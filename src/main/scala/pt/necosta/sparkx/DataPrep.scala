@@ -16,7 +16,7 @@ object DataPrep {
 class DataPrep(sourceFolder: String) extends WithSpark {
   import spark.implicits._
 
-  private val SOURCE_URL = "https://www.transtats.bts.gov/Download_Lookup.asp"
+  private val sourceUrl = "https://www.transtats.bts.gov/Download_Lookup.asp"
 
   val baseTableName = "BASE"
   val airlineTableName = "L_AIRLINE_ID"
@@ -31,48 +31,56 @@ class DataPrep(sourceFolder: String) extends WithSpark {
       .as[InputRecord]
   }
 
-  def getLookup(sourceFilePath: String): Dataset[LookupRecord] = {
+  def getLookupDs(sourceFilePath: String): Dataset[LookupRecord] = {
     csvToDataFrame(sourceFilePath)
       .as[LookupRecord]
   }
 
   def buildFinalDs(): Dataset[InputRecord] => Dataset[OutputRecord] = {
 
-    val JOIN_BROADCAST_HINT = "broadcast"
+    val joinHint = "broadcast"
+    val joinType = "left_outer"
+    val airlineKey = "AIRLINE_ID"
+    val originAirportKey = "ORIGIN_AIRPORT_ID"
+    val destAirportKey = "DEST_AIRPORT_ID"
 
     val airlineFilePath = s"$sourceFolder/${tables(airlineTableName)}"
     val airportFilePath = s"$sourceFolder/${tables(airportTableName)}"
 
-    val airlineDataset = getLookup(airlineFilePath)
-      .withColumnRenamed("Code", "AirlineCode")
+    val airlineDataset = getLookupDs(airlineFilePath)
+      .withColumnRenamed("Code", airlineKey)
       .withColumnRenamed("Description", "AirlineDesc")
-    val airportDataset = getLookup(airportFilePath)
+    val airportDataset = getLookupDs(airportFilePath)
       .withColumnRenamed("Code", "AirportCode")
       .withColumnRenamed("Description", "AirportDesc")
 
-    // ToDo: Assume all lookups have a match vs apply left join
     ds =>
       {
-        ds.join(airlineDataset.hint(JOIN_BROADCAST_HINT))
-          .where($"AIRLINE_ID" === $"AirlineCode")
+        ds.join(airlineDataset.hint(joinHint), Seq(airlineKey), joinType)
           .join(
             airportDataset
-              .hint(JOIN_BROADCAST_HINT)
-              .withColumnRenamed("AirportCode", "OriginAirportCode")
-              .withColumnRenamed("AirportDesc", "OriginAirportDesc"))
-          .where($"ORIGIN_AIRPORT_ID" === $"OriginAirportCode")
+              .hint(joinHint)
+              .withColumnRenamed("AirportCode", originAirportKey)
+              .withColumnRenamed("AirportDesc", "OriginAirportDesc"),
+            Seq(originAirportKey),
+            joinType
+          )
           .join(
             airportDataset
-              .hint(JOIN_BROADCAST_HINT)
-              .withColumnRenamed("AirportCode", "DestAirportCode")
-              .withColumnRenamed("AirportDesc", "DestAirportDesc"))
-          .where($"DEST_AIRPORT_ID" === $"DestAirportCode")
+              .hint(joinHint)
+              .withColumnRenamed("AirportCode", destAirportKey)
+              .withColumnRenamed("AirportDesc", "DestAirportDesc"),
+            Seq(destAirportKey),
+            joinType
+          )
           .transform[OutputRecord](applyDatasetTransform())
       }
   }
 
   def importLookupTables(): Unit = {
-    tables.filter(t => t._1 != baseTableName).foreach(importTable)
+    tables
+      .filter(t => t._1 != baseTableName)
+      .foreach(importTable)
   }
 
   def applyDatasetTransform(): Dataset[Row] => Dataset[OutputRecord] = { ds =>
@@ -94,7 +102,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
 
   private def importTable(lookupMap: (String, String)): Unit = {
     val content = scala.io.Source
-      .fromURL(s"$SOURCE_URL?Lookup=${lookupMap._1}")
+      .fromURL(s"$sourceUrl?Lookup=${lookupMap._1}")
       .mkString
     new PrintWriter(s"$sourceFolder/${lookupMap._2}") {
       write(content); close()

@@ -12,7 +12,7 @@ object Dataflow {
 class Dataflow(sourceFolder: String) extends WithSpark {
 
   private val SAVE_FORMAT = "parquet"
-  val dataPrep : DataPrep = DataPrep.init(sourceFolder)
+  val dataPrep: DataPrep = DataPrep.init(sourceFolder)
   val outputFile = s"$sourceFolder/output.parquet"
 
   def runImport(): Unit = {
@@ -23,6 +23,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     // 3 - Build final denormalized dataset
     val transformedDs =
       sourceDs.transform(DataPrep.init(sourceFolder).buildFinalDs())
+    println(s"Imported file has ${transformedDs.count()} rows")
     // 4 - Persist final dataset as parquet for future Spark jobs
     transformedDs.write.format(SAVE_FORMAT).save(outputFile)
   }
@@ -40,7 +41,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     val delaysByAirlineRecords = delaysByAirlineDs
       .orderBy(asc("DeparturesWithDelayPerc"))
       .take(NUMBER_RECORDS)
-    println(s"The top $NUMBER_RECORDS airports with the least delay are:")
+    println(s"\nThe top $NUMBER_RECORDS airports with the least delay are:\n")
     delaysByAirlineRecords.foreach(r =>
       println(
         s"${r.AirlineDesc}: ${"%.2f".format(r.DeparturesWithDelayPerc.get * 100)}% delays"))
@@ -54,7 +55,7 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     val flightsByAirlineRecords = flightsByAirlineToCityDs
       .orderBy(desc("FlightsCount"))
       .take(NUMBER_RECORDS)
-    println(s"The top $NUMBER_RECORDS airlines that fly to $city are:")
+    println(s"\nThe top $NUMBER_RECORDS airlines that fly to $city are:\n")
     flightsByAirlineRecords.foreach(r =>
       println(s"${r.AirlineDesc}: ${r.FlightsCount} flights"))
 
@@ -65,10 +66,10 @@ class Dataflow(sourceFolder: String) extends WithSpark {
       .orderBy(desc("AvgDelayTime"))
       .take(NUMBER_RECORDS)
     println(
-      s"The top $NUMBER_RECORDS airlines/airports combinations by delay time:")
+      s"\nThe top $NUMBER_RECORDS airlines/airports combinations by delay time:\n")
     delaysByAirlineAndByAirportRecords.foreach(r =>
       println(
-        s"${r.AirlineDesc}-${r.DestAirportDesc}: ${"%.2f".format(r.AvgDelayTime.get)} min (avg)"))
+        s"${r.AirlineDesc} to ${r.DestAirportDesc}: ${"%.2f".format(r.AvgDelayTime.get)} min (avg)"))
 
     // ToDo: Any other interesting insights
   }
