@@ -68,8 +68,8 @@ class Dataflow(sourceFolder: String) extends WithSpark {
     println(
       s"\nThe top $NUMBER_RECORDS airlines/airports combinations by delay time:\n")
     delaysByAirlineAndByAirportRecords.foreach(r =>
-      println(
-        s"${r.AirlineDesc} to ${r.DestAirportDesc}: ${"%.2f".format(r.AvgDelayTime.get)} min (avg)"))
+      println(s"${r.AirlineDesc} to ${r.DestAirportDesc}: ${"%.2f".format(
+        r.AvgDelayTime.get)} min (avg)"))
 
     // ToDo: Any other interesting insights
   }

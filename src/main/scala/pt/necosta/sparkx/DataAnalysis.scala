@@ -17,12 +17,16 @@ object DataAnalysis extends WithSpark {
   def getDelaysByAirline: Dataset[OutputRecord] => Dataset[AirlineDelays] = {
     import spark.implicits._
 
+    val isDelayedCol = "IsDelayed"
     ds =>
       ds.transform(ignoreCancelled())
-        .withColumn("IsDelayed", isDelayedUdf(col("DepartureDelay")))
+        .withColumn(isDelayedCol,
+                    when(col("DepartureDelay").isNull, 0)
+                      .otherwise(isDelayedUdf(col("DepartureDelay"))))
+        // ToDo: AirlineID would be more efficient to group by
         .groupBy($"AirlineDesc")
         .agg(
-          (sum("IsDelayed") / count("DepartureDelay")).alias(
+          (sum(isDelayedCol) / count(isDelayedCol)).alias(
             "DeparturesWithDelayPerc")
         )
         .select("AirlineDesc", "DeparturesWithDelayPerc")

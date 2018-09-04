@@ -43,3 +43,4 @@ jobs:
     - run: cat /dev/null | sbt package
 
     # ToDo: Build and push docker to docker registry
+    # docker build --build-arg VERSION=x.y.z -t sparkx:x.y.z .
