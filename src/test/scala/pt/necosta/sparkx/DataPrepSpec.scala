@@ -40,7 +40,7 @@ class DataPrepSpec extends TestConfig {
       .transform(DataPrep.init(testFolderPath).buildFinalDs())
 
     out.count() should be(10)
-    out.columns.length should be(9)
+    out.columns.length should be(12)
     // Builds outputData.csv...
     //out.show(false)
   }

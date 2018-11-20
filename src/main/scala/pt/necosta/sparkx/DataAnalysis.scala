@@ -13,6 +13,7 @@ case class AirlineAirportDelays(AirlineDesc: String,
                                 AvgDelayTime: Option[Double])
 
 object DataAnalysis extends WithSpark {
+  import DataPrep._
 
   def getDelaysByAirline: Dataset[OutputRecord] => Dataset[AirlineDelays] = {
     import spark.implicits._
@@ -23,13 +24,12 @@ object DataAnalysis extends WithSpark {
         .withColumn(isDelayedCol,
                     when(col("DepartureDelay").isNull, 0)
                       .otherwise(isDelayedUdf(col("DepartureDelay"))))
-        // ToDo: AirlineID would be more efficient to group by
-        .groupBy($"AirlineDesc")
+        .groupBy(airlineKey, airlineDesc)
         .agg(
           (sum(isDelayedCol) / count(isDelayedCol)).alias(
             "DeparturesWithDelayPerc")
         )
-        .select("AirlineDesc", "DeparturesWithDelayPerc")
+        .select(airlineDesc, "DeparturesWithDelayPerc")
         .as[AirlineDelays]
   }
 
@@ -39,12 +39,12 @@ object DataAnalysis extends WithSpark {
 
     ds =>
       ds.transform(ignoreCancelled())
-        .filter(r => r.DestAirportDesc.contains(city))
-        .groupBy($"AirlineDesc")
+        .filter(_.DestAirportDesc.contains(city))
+        .groupBy(airlineKey, airlineDesc)
         .agg(
           count("OP_CARRIER_FL_NUM").alias("FlightsCount")
         )
-        .select("AirlineDesc", "FlightsCount")
+        .select(airlineDesc, "FlightsCount")
         .as[AirlineFlights]
   }
 
@@ -55,11 +55,14 @@ object DataAnalysis extends WithSpark {
     ds =>
       ds.transform(ignoreCancelled())
         .withColumn("DelayTime", delayMinUdf(col("ArrivalDelay")))
-        .groupBy($"AirlineDesc", $"DestAirportDesc")
+        .groupBy(col(airlineKey),
+                 col(airlineDesc),
+                 col(destAirportKey),
+                 col(destAirportDesc))
         .agg(
           avg("DelayTime").alias("AvgDelayTime")
         )
-        .select("AirlineDesc", "DestAirportDesc", "AvgDelayTime")
+        .select(airlineDesc, destAirportDesc, "AvgDelayTime")
         .as[AirlineAirportDelays]
   }
 

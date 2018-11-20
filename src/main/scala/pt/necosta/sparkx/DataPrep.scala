@@ -8,6 +8,13 @@ import org.apache.spark.sql.types.{BooleanType, IntegerType}
 
 object DataPrep {
 
+  val airlineKey = "OP_CARRIER_AIRLINE_ID"
+  val airlineDesc = "airlineDesc"
+  val originAirportKey = "ORIGIN_AIRPORT_ID"
+  val originAirportDesc = "originAirportDesc"
+  val destAirportKey = "DEST_AIRPORT_ID"
+  val destAirportDesc = "destAirportDesc"
+
   def init(sourceFolder: String): DataPrep = {
     new DataPrep(sourceFolder)
   }
@@ -15,6 +22,7 @@ object DataPrep {
 
 class DataPrep(sourceFolder: String) extends WithSpark {
   import spark.implicits._
+  import DataPrep._
 
   private val sourceUrl = "https://www.transtats.bts.gov/Download_Lookup.asp"
 
@@ -40,16 +48,13 @@ class DataPrep(sourceFolder: String) extends WithSpark {
 
     val joinHint = "broadcast"
     val joinType = "left_outer"
-    val airlineKey = "OP_CARRIER_AIRLINE_ID"
-    val originAirportKey = "ORIGIN_AIRPORT_ID"
-    val destAirportKey = "DEST_AIRPORT_ID"
 
     val airlineFilePath = s"$sourceFolder/${tables(airlineTableName)}"
     val airportFilePath = s"$sourceFolder/${tables(airportTableName)}"
 
     val airlineDataset = getLookupDs(airlineFilePath)
       .withColumnRenamed("Code", airlineKey)
-      .withColumnRenamed("Description", "AirlineDesc")
+      .withColumnRenamed("Description", airlineDesc)
     val airportDataset = getLookupDs(airportFilePath)
       .withColumnRenamed("Code", "AirportCode")
       .withColumnRenamed("Description", "AirportDesc")
@@ -61,7 +66,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
             airportDataset
               .hint(joinHint)
               .withColumnRenamed("AirportCode", originAirportKey)
-              .withColumnRenamed("AirportDesc", "OriginAirportDesc"),
+              .withColumnRenamed("AirportDesc", originAirportDesc),
             Seq(originAirportKey),
             joinType
           )
@@ -69,7 +74,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
             airportDataset
               .hint(joinHint)
               .withColumnRenamed("AirportCode", destAirportKey)
-              .withColumnRenamed("AirportDesc", "DestAirportDesc"),
+              .withColumnRenamed("AirportDesc", destAirportDesc),
             Seq(destAirportKey),
             joinType
           )
@@ -88,15 +93,20 @@ class DataPrep(sourceFolder: String) extends WithSpark {
       .withColumn("ArrivalDelay", col("ARR_DELAY").cast(IntegerType))
       .withColumn("IsCancelled",
                   col("CANCELLED").cast(IntegerType).cast(BooleanType))
-      .select("FL_DATE",
-              "AirlineDesc",
-              "OP_CARRIER_FL_NUM",
-              "OriginAirportDesc",
-              "DestAirportDesc",
-              "DEST_CITY_NAME",
-              "DepartureDelay",
-              "ArrivalDelay",
-              "IsCancelled")
+      .select(
+        "FL_DATE",
+        airlineKey,
+        airlineDesc,
+        "OP_CARRIER_FL_NUM",
+        originAirportKey,
+        originAirportDesc,
+        destAirportKey,
+        destAirportDesc,
+        "DEST_CITY_NAME",
+        "DepartureDelay",
+        "ArrivalDelay",
+        "IsCancelled"
+      )
       .as[OutputRecord]
   }
 

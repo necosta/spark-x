@@ -15,7 +15,10 @@ case class InputRecord(FL_DATE: Timestamp,
 case class LookupRecord(Code: Int, Description: String)
 
 case class OutputRecord(FL_DATE: Timestamp,
+                        OP_CARRIER_AIRLINE_ID: Int,
                         AirlineDesc: String,
+                        ORIGIN_AIRPORT_ID: Int,
+                        DEST_AIRPORT_ID: Int,
                         OriginAirportDesc: String,
                         DestAirportDesc: String,
                         DEST_CITY_NAME: String,
