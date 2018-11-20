@@ -1,4 +1,7 @@
 # spark-x
+
+[![CircleCI](https://circleci.com/gh/necosta/spark-x.svg?style=svg)](https://circleci.com/gh/necosta/spark-x)
+
 Simple Spark project built in Scala
 
 ### CI dashboard
