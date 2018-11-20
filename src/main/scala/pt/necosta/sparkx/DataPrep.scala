@@ -40,7 +40,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
 
     val joinHint = "broadcast"
     val joinType = "left_outer"
-    val airlineKey = "AIRLINE_ID"
+    val airlineKey = "OP_CARRIER_AIRLINE_ID"
     val originAirportKey = "ORIGIN_AIRPORT_ID"
     val destAirportKey = "DEST_AIRPORT_ID"
 
@@ -90,7 +90,7 @@ class DataPrep(sourceFolder: String) extends WithSpark {
                   col("CANCELLED").cast(IntegerType).cast(BooleanType))
       .select("FL_DATE",
               "AirlineDesc",
-              "FL_NUM",
+              "OP_CARRIER_FL_NUM",
               "OriginAirportDesc",
               "DestAirportDesc",
               "DEST_CITY_NAME",

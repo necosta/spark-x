@@ -3,8 +3,8 @@ package pt.necosta.sparkx
 import java.sql.Timestamp
 
 case class InputRecord(FL_DATE: Timestamp,
-                       AIRLINE_ID: Int,
-                       FL_NUM: Int,
+                       OP_CARRIER_AIRLINE_ID: Int,
+                       OP_CARRIER_FL_NUM: Int,
                        ORIGIN_AIRPORT_ID: Int,
                        DEST_AIRPORT_ID: Int,
                        DEST_CITY_NAME: String,

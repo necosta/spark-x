@@ -42,7 +42,7 @@ object DataAnalysis extends WithSpark {
         .filter(r => r.DestAirportDesc.contains(city))
         .groupBy($"AirlineDesc")
         .agg(
-          count("FL_NUM").alias("FlightsCount")
+          count("OP_CARRIER_FL_NUM").alias("FlightsCount")
         )
         .select("AirlineDesc", "FlightsCount")
         .as[AirlineFlights]

@@ -1,4 +1,4 @@
-"FL_DATE"            |"AirlineDesc"                    |"FL_NUM"|"OriginAirportDesc"                                |"DestAirportDesc"                                  |"DEST_CITY_NAME"       |"DepartureDelay"|"ArrivalDelay"|"IsCancelled"|
+"FL_DATE"            |"AirlineDesc"                    |"OP_CARRIER_FL_NUM"|"OriginAirportDesc"                                |"DestAirportDesc"                                  |"DEST_CITY_NAME"       |"DepartureDelay"|"ArrivalDelay"|"IsCancelled"|
 2018-01-01 00:00:00|Mackey International Inc.: MAC |229   |Afognak Lake, AK: Afognak Lake Airport           |Granite Mountain, AK: Bear Creek Mining Strip    |Kona, HI             |30            |41          |false      |
 2018-01-01 00:00:00|Mackey International Inc.: MAC |230   |Granite Mountain, AK: Bear Creek Mining Strip    |Afognak Lake, AK: Afognak Lake Airport           |Dallas/Fort Worth, TX|				          |            |true       |
 2018-01-01 00:00:00|Munz Northern Airlines Inc.: XY|231   |Little Squaw, AK: Little Squaw Airport           |Kahului, HI: Kahului Airport                     |Kahului, HI          |32            |72          |false      |
